@@ -1,0 +1,46 @@
+﻿#pragma kernel CSMain
+ 
+StructuredBuffer<float> buffer;
+RWStructuredBuffer<float> buffer2;
+RWStructuredBuffer<float> buffer3;
+RWStructuredBuffer<float> buffer4;
+RWStructuredBuffer<float> buffer5;
+Texture2D<float4> tex;
+Texture2D<float> tex2;
+Texture2D<float> tex3;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+ 
+[numthreads(32,1,1)]
+void CSMain (uint id : SV_DispatchThreadID)
+{
+	uint count, stride;
+	float2 index;
+	float4 t;
+	float t2,t3;
+	buffer2.GetDimensions(count, stride);
+	uint numOfSteps = ceil(count/1024.0);
+	for( uint i = 0;i < numOfSteps; i++ )
+	{
+		index = float2(buffer[id.x*numOfSteps*2+2*i],buffer[id.x*numOfSteps*2+2*i+1]);
+		t = tex.SampleLevel(_LinearClamp, index, 0);
+		t2 = tex2.SampleLevel(_LinearClamp, index, 0);
+		t3 = tex3.SampleLevel(_LinearClamp, index, 0);
+  		buffer2[id.x*numOfSteps+i] = t.x + t.y + t.z + t2+t3;
+  		buffer3[id.x*numOfSteps+i] = t2;
+  		buffer4[id.x*numOfSteps+i] = t3;
+  		if(t.z>0){
+  			buffer5[id.x*numOfSteps+i] = 2;
+  		}
+  		if(t.y>0){
+  			buffer5[id.x*numOfSteps+i] = 1;
+  		}
+  		else{
+  			buffer5[id.x*numOfSteps+i] = 0;
+  		}
+	}
+
+}

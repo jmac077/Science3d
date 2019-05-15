@@ -1,0 +1,21 @@
+﻿#pragma kernel CSMain
+RWStructuredBuffer<float> buf;
+Texture2D<float> tex;
+Texture2D<float> tex2;
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+[numthreads(1,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	float x,z;
+	x = buf[0];
+	z = buf[1];
+	float2 index = float2(x,z);
+	float t = tex.SampleLevel(_LinearClamp, index, 0)/2;
+	float t2 = tex2.SampleLevel(_LinearClamp, index, 0)/2;
+	buf[0] = t + t2;
+}

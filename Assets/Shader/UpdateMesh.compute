@@ -1,0 +1,12 @@
+﻿#pragma kernel CSMain
+ 
+RWStructuredBuffer<float> buffer;
+Texture2D<float4> tex;
+ 
+[numthreads(32,32,1)]
+void CSMain (int3 groupID : SV_GroupID , int3 threadID : SV_GroupThreadID)
+{
+	int2 index = int2((threadID.x+32*threadID.y),(groupID.x+32*groupID.y));
+	float4 t = tex.Load(int3(index.x*2,index.y*2,0));
+	buffer[threadID.x+(groupID.x*1024)+(32*threadID.y)+(groupID.y*32768)] = t.x;
+}
